@@ -33,8 +33,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate }) => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-24 bg-[#0f172a] border-t border-white/5 flex items-center px-6 pb-6 pt-3 z-40 max-w-md mx-auto">
-      <div className="flex justify-between items-center w-full">
+    <div className="fixed bottom-0 left-0 right-0 bg-[#0f172a]/95 backdrop-blur-xl border-t border-white/5 flex items-center px-6 pb-safe pt-3 z-40 max-w-md mx-auto h-[calc(80px+var(--sab))]">
+      <div className="flex justify-between items-start w-full h-full pt-1">
         {items.map((item) => {
           const isActive = currentView === item.type;
           return (
@@ -43,7 +43,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate }) => {
               onClick={() => onNavigate(item.type)}
               className={`flex flex-col items-center gap-1 transition-all ${isActive ? 'text-blue-500' : 'text-slate-600'}`}
             >
-              {item.icon(isActive)}
+              <div className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-blue-500/10' : ''}`}>
+                {item.icon(isActive)}
+              </div>
               <span className={`text-[10px] font-bold ${isActive ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
             </button>
           );

@@ -14,6 +14,13 @@ export interface UserProfile {
   email: string;
 }
 
+export interface NotificationSettings {
+  dailyReminders: boolean;
+  budgetAlerts: boolean;
+  aiInsights: boolean;
+  reminderTime: string;
+}
+
 export interface Transaction {
   id: string;
   amount: number;

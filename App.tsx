@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ViewType, Transaction, CategoryDef, UserProfile } from './types';
+import { ViewType, Transaction, CategoryDef, UserProfile, NotificationSettings } from './types';
 import Dashboard from './components/Dashboard';
 import Analysis from './components/Analysis';
 import Budget from './components/Budget';
@@ -16,6 +16,13 @@ const DEFAULT_CATEGORIES: CategoryDef[] = [
   { id: 'alisveris', name: 'Alışveriş', icon: '🛍️', initialBudget: 800, color: '#f472b6', bg: 'bg-pink-400' },
   { id: 'teknoloji', name: 'Teknoloji', icon: '💻', initialBudget: 1000, color: '#475569', bg: 'bg-slate-600' },
 ];
+
+const DEFAULT_NOTIFICATIONS: NotificationSettings = {
+  dailyReminders: true,
+  budgetAlerts: true,
+  aiInsights: true,
+  reminderTime: '20:00'
+};
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>(() => {
@@ -41,12 +48,18 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
   });
 
+  const [notifications, setNotifications] = useState<NotificationSettings>(() => {
+    const saved = localStorage.getItem('parayon_notifications');
+    return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+  });
+
   useEffect(() => {
     if (user) localStorage.setItem('parayon_user', JSON.stringify(user));
     localStorage.setItem('parayon_transactions', JSON.stringify(transactions));
     localStorage.setItem('parayon_balance', unassignedBalance.toString());
     localStorage.setItem('parayon_categories', JSON.stringify(categories));
-  }, [user, transactions, unassignedBalance, categories]);
+    localStorage.setItem('parayon_notifications', JSON.stringify(notifications));
+  }, [user, transactions, unassignedBalance, categories, notifications]);
 
   const handleNavigate = (view: ViewType) => {
     if (view === ViewType.ADD_TRANSACTION) {
@@ -58,6 +71,14 @@ const App: React.FC = () => {
   const handleRegistrationComplete = (newUser: UserProfile) => {
     setUser(newUser);
     setCurrentView(ViewType.DASHBOARD);
+  };
+
+  const handleUpdateUser = (updatedUser: UserProfile) => {
+    setUser(updatedUser);
+  };
+
+  const handleUpdateNotifications = (settings: NotificationSettings) => {
+    setNotifications(settings);
   };
 
   const handleAddTransaction = (newTx: Omit<Transaction, 'id'>) => {
@@ -131,7 +152,15 @@ const App: React.FC = () => {
           />
         );
       case ViewType.PROFILE:
-        return <Profile user={user} onClearData={handleClearData} />;
+        return (
+          <Profile 
+            user={user} 
+            notifications={notifications}
+            onUpdateUser={handleUpdateUser} 
+            onUpdateNotifications={handleUpdateNotifications}
+            onClearData={handleClearData} 
+          />
+        );
       case ViewType.ADD_TRANSACTION:
         return (
           <AddTransaction 
@@ -148,14 +177,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen max-w-md mx-auto bg-[#0f172a] overflow-hidden flex flex-col shadow-2xl">
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
+    <div className="relative h-full w-full max-w-md mx-auto bg-[#0f172a] overflow-hidden flex flex-col shadow-2xl">
+      <div className="scroll-container no-scrollbar">
         {renderView()}
       </div>
 
       {user && currentView !== ViewType.ADD_TRANSACTION && (
         <>
-          <div className="fixed bottom-24 right-6 z-50">
+          <div className="fixed bottom-28 right-6 z-50">
             <button 
               onClick={() => handleNavigate(ViewType.ADD_TRANSACTION)}
               className="w-16 h-16 bg-blue-600 text-white rounded-full shadow-lg blue-glow flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
